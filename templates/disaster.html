@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>NCUT灾难事件数据库</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/css/layui.css" media="all">
+    <style type="text/css">
+        .btn-ncut {
+            border: 0;
+            background-color: transparent;
+            outline: none;
+            color: #c2c2c2;
+            cursor: pointer;
+        }
+        .a-ncut {
+            text-align: center;
+        }
+    </style>
+    <script type="text/javascript" src="/static/layui.js"></script>
+    <script type="text/javascript" src="/static/jquery-3.6.0.min.js"></script>
+    <script>
+        function jump() {
+            window.location.hash = "#" + "{{ anchor }}";
+        }
+    </script>
+</head>
+
+<body onload="jump()">
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo layui-hide-xs layui-bg-black">NCUT灾难事件数据库</div>
+            <ul class="layui-nav layui-layout-right">
+                <li class="layui-nav-item layui-hide layui-show-md-inline-block">
+                    <a href="javascript:;">
+                        <img src="/static/images/ncut.jpeg" class="layui-nav-img">
+                        王旭
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll">
+                <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                    <li class="layui-nav-item layui-nav-itemed">
+                        <a class="a-ncut" href="javascript:;">导入数据</a>
+                        <dl class="layui-nav-child" style="text-align: center;">
+                            <dd>
+                                <form action="/disaster/" method="GET">
+                                    <button name="func" type="submit" value="manual_import"
+                                        class="btn-ncut">手动导入</button>
+                                </form>
+                            </dd>
+                            <dd>
+                                <form action="/disaster/" method="GET">
+                                    <button name="func" type="submit" value="auto_import" class="btn-ncut">自动导入</button>
+                                </form>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item layui-nav-itemed">
+                        <a class="a-ncut" href="javascript:;">修改与校正</a>
+                        <dl class="layui-nav-child" style="text-align: center;">
+                            <dd>
+                                <form action="/disaster/" method="GET">
+                                    <button name="func" type="submit" value="alter_data" class="btn-ncut">修改数据</button>
+                                </form>
+                            </dd>
+                            <dd>
+                                <form action="/disaster/" method="GET">
+                                    <button name="func" type="submit" value="correct_data"
+                                        class="btn-ncut">校正数据</button>
+                                </form>
+                            </dd>
+                        </dl>
+                    </li>
+                    <li class="layui-nav-item layui-nav-itemed">
+                        <a class="a-ncut" href="javascript:;">可视化与数据挖掘</a>
+                        <dl class="layui-nav-child" style="text-align: center;">
+                            <dd>
+                                <form action="/disaster/" method="GET">
+                                    <button name="func" type="submit" value="display_data"
+                                        class="btn-ncut">数据可视化</button>
+                                </form>
+                            </dd>
+                            <dd>
+                                <form action="/disaster/" method="GET">
+                                    <button name="func" type="submit" value="data_mining" class="btn-ncut">数据挖掘</button>
+                                </form>
+                            </dd>
+                        </dl>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="layui-body">
+            {% if func == 'manual_import' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">手动导入</legend>
+            </fieldset>
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="text" name="url" lay-verify="title" autocomplete="off" placeholder="请输入网页地址"
+                            class="layui-input" style="width:600px">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震" checked="">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="text" name="time" id="date" lay-verify="date" placeholder="请选择时间"
+                            autocomplete="off" class="layui-input" style="width:600px">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select lay-filter="province" name="province" id="selProvince" onchange="provinceChange();"
+                            lay-verify="required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select name="prefecture" id="selPrefecture" "lay-verify=" required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="manual_import"
+                            value="True">导入</button>
+                    </div>
+                </div>
+                <div align="center">
+                    {% if is_manual_import is None %}
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        请输入信息后点击导入按钮！
+                    </blockquote>
+                    {% elif is_manual_import == 'True' %}
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        数据导入成功！
+                    </blockquote>
+                    {% elif is_manual_import == 'False' %}
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        数据导入失败，网页地址错误！
+                    </blockquote>
+                    {% elif is_manual_import == 'Faile' %}
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        数据导入失败，请勿重复录入！
+                    </blockquote>
+                    {% endif %}
+                </div>
+            </form>
+            {% elif func == 'auto_import' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">自动导入</legend>
+            </fieldset>
+            <form enctype="multipart/form-data" class="layui-form" action="/disaster/" lay-filter="example"
+                method="POST">
+                <div class="layui-form-item">
+                    <div class="layui-upload" align="center">
+                        <input type="button" value="选取文件" class="layui-btn layui-btn-normal" onclick="getFile()">
+                        <input style="display: none" type="file" accept=".csv, text/plain" name="auto_import" id="getF"
+                            onchange="clickF()">
+                        <button type="submit" class="layui-btn" id="import">导入</button>
+                    </div>
+                </div>
+                <script>
+                    function getFile() {
+                        $("#getF").click();
+                    }
+                    var filename = "";
+                    function clickF() {
+                        filename = $("#getF").val();
+                        var filenames = filename.split("\\");
+                        filename = filenames[filenames.length - 1];
+                        $("#lb").text(filename);
+                    }
+                </script>
+                <div align="center">
+                    {% if is_auto_import is None %}
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        请将网页地址输入至csv文件或txt文件中，每行输入一个地址。之后选取文件并点击导入按钮！
+                    </blockquote>
+                    {% elif is_auto_import == 'True' %}
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        正在导入，请到“校正数据”界面查看导入结果并进行数据校正！
+                    </blockquote>
+                    {% elif is_auto_import == 'False' %}
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        读取文件失败！
+                    </blockquote>
+                    {% endif %}
+                </div>
+            </form>
+            {% elif func == 'alter_data' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">修改数据</legend>
+            </fieldset>
+            {% if is_enter == 'False' %}
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震" checked="">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select lay-filter="province" name="province" id="selProvince" onchange="provinceChange();"
+                            lay-verify="required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                            name="alter_data_search" value="True">查询</button>
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        默认关闭过滤查询功能，如需开启请通过下方开关设置！
+                        <div class="layui-btn-container" align="center">
+                            <input type="checkbox" name="switch" lay-filter="switchTest" lay-skin="switch"
+                                lay-text="过滤开启|过滤关闭">
+                        </div>
+                    </blockquote>
+                </div>
+                {% if is_search == 'True' %}
+                {% if num > 0 %}
+                <div align="center">
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        找到了以下 {{ num }} 条结果：
+                    </blockquote>
+                </div>
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <colgroup>
+                            <col width="200">
+                            <col width="100">
+                            <col width="100">
+                            <col width="50">
+                            <col width="50">
+                            <col width="200">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>标题</th>
+                                <th>时间</th>
+                                <th>地点</th>
+                                <th>灾难类型</th>
+                                <th>网页快照</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sl in search_list %}
+                            <tr>
+                                <td>{{ sl.title }}</td>
+                                <td>{{ sl.time }}</td>
+                                <td>{{ sl.location }}</td>
+                                <td>{{ sl.category }}</td>
+                                <td>{{ sl.shot }}</td>
+                                <td>
+                                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                                        name="alter" value="{{ sl.id }}">修改</button>
+                                    <button type="submit" class="layui-btn layui-btn-danger" lay-submit=""
+                                        lay-filter="demo1" name="alter_delete" value="{{ sl.id }}">删除</button>
+                                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit=""
+                                        lay-filter="demo1" name="alter_refresh" value="{{ sl.id }}">刷新网页快照</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        没有找到您要找的记录！
+                    </blockquote>
+                </div>
+                {% endif %}
+                {% elif is_search == 'Delete' %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已删除记录！
+                    </blockquote>
+                </div>
+                {% elif is_search == 'Refresh' %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已刷新网页快照！
+                    </blockquote>
+                </div>
+                {% endif %}
+            </form>
+            {% elif is_enter == 'True' %}
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <colgroup>
+                            <col width="150">
+                            <col width="150">
+                            <col width="150">
+                            <col width="150">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>标题</th>
+                                <th>时间</th>
+                                <th>地点</th>
+                                <th>灾难类型</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ title }}</td>
+                                <td>{{ time }}</td>
+                                <td>{{ location }}</td>
+                                <td>{{ category }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-collapse" lay-filter="test">
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">正文</h2>
+                        <div class="layui-colla-content">
+                            <p>{{ text }}</p>
+                        </div>
+                    </div>
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">网页快照</h2>
+                        <div class="layui-colla-content" align="center">
+                            {% if is_shot == 'True' %}
+                            <img src="{{ shot }}" width="70%" height="70%" />
+                            {% else %}
+                            <p>无法显示网页快照，请刷新网页快照后重试！</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                </br>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                            class="layui-input" style="width:600px">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震" checked="">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="text" name="time" id="date" lay-verify="date" placeholder="请选择时间"
+                            autocomplete="off" class="layui-input" style="width:600px">
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select lay-filter="province" name="province" id="selProvince" onchange="provinceChange();"
+                            lay-verify="required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select name="prefecture" id="selPrefecture" lay-verify=" required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <a class="layui-btn layui-btn-normal" href="{{ url }}" target="_blank">原网页</a>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="alter_enter"
+                            value="{{ id }}">修改</button>
+                        <a class="layui-btn" href="/disaster/?func=alter_data">返回</a>
+                    </div>
+                </div>
+                {% if is_alter_enter == 'True' %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已修改数据！
+                    </blockquote>
+                </div>
+                {% endif %}
+            </form>
+            {% endif %}
+            {% elif func == 'correct_data' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">校正数据</legend>
+            </fieldset>
+            {% if is_enter == 'False' %}
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震" checked="">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                        <input type="radio" name="category" value="未知" title="未知">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                            name="correct_data_search" value="True">查询</button>
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        默认关闭过滤查询功能，如需开启请通过下方开关设置！
+                        <div class="layui-btn-container" align="center">
+                            <input type="checkbox" name="switch" lay-filter="switchTest" lay-skin="switch"
+                                lay-text="过滤开启|过滤关闭">
+                        </div>
+                    </blockquote>
+                </div>
+                {% if is_search == 'True' %}
+                {% if num > 0 %}
+                <div align="center">
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        找到了以下 {{ num }} 条结果，点击按钮进行刷新数据库
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="fresh"
+                            value="True">刷新</button>
+                    </blockquote>
+                </div>
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <colgroup>
+                            <col width="200">
+                            <col width="100">
+                            <col width="100">
+                            <col width="50">
+                            <col width="50">
+                            <col width="200">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>标题</th>
+                                <th>时间</th>
+                                <th>地点</th>
+                                <th>灾难类型</th>
+                                <th>网页快照</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sl in search_list %}
+                            <tr>
+                                <td>{{ sl.title }}</td>
+                                <td>{{ sl.time }}</td>
+                                <td>{{ sl.location }}</td>
+                                <td>{{ sl.category }}</td>
+                                <td>{{ sl.shot }}</td>
+                                <td>
+                                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1"
+                                        name="correct" value="{{ sl.id }}">校正</button>
+                                    <button type="submit" class="layui-btn layui-btn-danger" lay-submit=""
+                                        lay-filter="demo1" name="correct_delete" value="{{ sl.id }}">删除</button>
+                                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit=""
+                                        lay-filter="demo1" name="correct_refresh" value="{{ sl.id }}">刷新网页快照</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        没有找到您要找的记录，点击按钮进行刷新数据库
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="fresh"
+                            value="True">刷新</button>
+                    </blockquote>
+                </div>
+                {% endif %}
+                {% elif is_search == 'Delete' %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已删除记录！
+                    </blockquote>
+                </div>
+                {% elif is_search == 'Refresh' %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已刷新网页快照！
+                    </blockquote>
+                </div>
+                {% elif is_search == 'Fresh' %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已刷新数据库！
+                    </blockquote>
+                </div>
+                {% endif %}
+            </form>
+            {% elif is_enter == 'True' %}
+            {% if is_correct_enter == 'False' %}
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        标题：{{ title }}
+                    </blockquote>
+                </div>
+                </br>
+                <div class="layui-collapse" lay-filter="test">
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">正文</h2>
+                        <div class="layui-colla-content">
+                            <p>{{ text }}</p>
+                        </div>
+                    </div>
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">网页快照</h2>
+                        <div class="layui-colla-content" align="center">
+                            {% if is_shot == 'True' %}
+                            <img src="{{ shot }}" width="70%" height="70%" />
+                            {% else %}
+                            <p>无法显示网页快照，请刷新网页快照后重试！</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                </br>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        可能的标题：{{ title }}
+                    </blockquote>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题" value="{{ title }}"
+                            class="layui-input" style="width:600px">
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        可能的类型：{{ category }}
+                    </blockquote>
+                </div>
+                <div class="layui-form-item" align="center">
+                    {% if category == '地震' or category == '未知' %}
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震" checked="">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                    {% elif category == '水灾' %}
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾" checked="">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                    {% elif category == '火灾' %}
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾" checked="">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                    {% elif category == '矿难' %}
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难" checked="">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                    {% elif category == '爆炸' %}
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸" checked="">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                    {% elif category == '空难' %}
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难" checked="">
+                    </div>
+                    {% endif %}
+                </div>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        可能的时间：{{ time }}
+                    </blockquote>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="text" name="time" id="date" lay-verify="date" placeholder="请选择时间"
+                            autocomplete="off" class="layui-input" style="width:600px">
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        可能的地点：{{ location }}
+                    </blockquote>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select lay-filter="province" name="province" id="selProvince" onchange="provinceChange();"
+                            lay-verify="required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select name="prefecture" id="selPrefecture" lay-verify=" required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <a class="layui-btn layui-btn-normal" href="{{ url }}" target="_blank">原网页</a>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="correct_enter"
+                            value="{{ id }}">校正</button>
+                        <a class="layui-btn" href="/disaster/?func=correct_data">返回</a>
+                    </div>
+                </div>
+            </form>
+            {% elif is_correct_enter == 'True' %}
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <colgroup>
+                            <col width="150">
+                            <col width="150">
+                            <col width="150">
+                            <col width="150">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>标题</th>
+                                <th>时间</th>
+                                <th>地点</th>
+                                <th>灾难类型</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ title }}</td>
+                                <td>{{ time }}</td>
+                                <td>{{ location }}</td>
+                                <td>{{ category }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-collapse" lay-filter="test">
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">正文</h2>
+                        <div class="layui-colla-content">
+                            <p>{{ text }}</p>
+                        </div>
+                    </div>
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">网页快照</h2>
+                        <div class="layui-colla-content" align="center">
+                            {% if is_shot == 'True' %}
+                            <img src="{{ shot }}" width="70%" height="70%" />
+                            {% else %}
+                            <p>无法显示网页快照，请刷新网页快照后重试！</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                </br>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <a class="layui-btn layui-btn-normal" href="{{ url }}" target="_blank">原网页</a>
+                        <a class="layui-btn" href="/disaster/?func=correct_data">返回</a>
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        已校正数据！
+                    </blockquote>
+                </div>
+            </form>
+            {% endif %}
+            {% endif %}
+            {% elif func == 'display_data' %}
+            {% if interface == 'main' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">数据可视化</legend>
+            </fieldset>
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="display_category" value="时间轴" title="时间轴" checked="">
+                        <input type="radio" name="display_category" value="灾难类型统计图" title="灾难类型统计图">
+                        <input type="radio" name="display_category" value="地区统计图" title="地区统计图">
+                        <input type="radio" name="display_category" value="地图" title="地图">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display"
+                            value="True">展示</button>
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        选择一种可视化，再点击展示按钮！
+                    </blockquote>
+                </div>
+            </form>
+            {% elif interface == 'time' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">时间轴</legend>
+            </fieldset>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="全部类型" title="全部类型" checked="">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="time_display"
+                            value="True">筛选</button>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+                {% if num > 0 %}
+                <div class="layui-form-item" align="center">
+                    <ul class="layui-timeline" style="display:inline-block;">
+                        {% for dl in display_list %}
+                        <li class="layui-timeline-item">
+                            <i class="layui-icon layui-timeline-axis"></i>
+                            <div class="layui-timeline-content layui-text">
+                                <h3 class="layui-timeline-title">{{ dl.time }}</h3>
+                                <p>{{ dl.location }}
+                                    <br>{{ dl.title }}
+                                </p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        没有可以展示的数据！
+                    </blockquote>
+                </div>
+                {% endif %}
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+            </form>
+            {% elif interface == 'map' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">地图</legend>
+            </fieldset>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div id="map" style="width:1300px;height:700px;"></div>
+                </div>
+                <script src="/static/Highcharts-9.1.0/Highcharts-Maps-9.1.2/code/highmaps.js"></script>
+                <script src="/static/china.js"></script>
+                <script>
+                    var data = [
+                        {% for k, v in province_data.items %}
+                    { "name": "{{ k }}", "value": {{ v }} },
+                    {% endfor %}
+                    { "name": "南海诸岛", "value": 0 },
+                    { "name": "南海诸岛", "value": 0 }];
+                    var map = new Highcharts.Map('map', {
+                        title: {
+                            text: '中国{{ category }}事件地图'
+                        },
+                        colorAxis: {
+                            min: 0,
+                            minColor: 'rgb(255,255,255)',
+                            maxColor: '#006cee'
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            data: data,
+                            name: '{{ category }}事件',
+                            mapData: Highcharts.maps['cn/china'],
+                            joinBy: 'name'
+                        }]
+                    });
+                </script>
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="全部类型" title="全部类型" checked="">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="map_display"
+                            value="True">筛选</button>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+            </form>
+            {% elif interface == 'category' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">灾难类型统计图</legend>
+            </fieldset>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" style="width:600px">
+                        <select lay-filter="province" name="province" id="selProvince" onchange="provinceChange();"
+                            lay-verify="required"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="category_display"
+                            value="True">筛选</button>
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class="layui-elem-quote" style="width:1000px">
+                        默认关闭过滤地区功能，如需开启请通过下方开关设置！
+                        <div class="layui-btn-container" align="center">
+                            <input type="checkbox" name="switch" lay-filter="switch" lay-skin="switch"
+                                lay-text="过滤开启|过滤关闭">
+                        </div>
+                    </blockquote>
+                </div>
+                <div id="container1" style="min-width:100px;height:500px"></div>
+                <script src="/static/Highcharts-9.1.0/code/highcharts.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/modules/exporting.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/highcharts-zh_CN.js"></script>
+                <script>
+                    var chart = Highcharts.chart('container1', {
+                        credits: {
+                            enabled: false
+                        },
+                        chart: {
+                            type: 'column'
+                        },
+                        title: {
+                            text: '{{ province }}灾难事件柱状图'
+                        },
+                        xAxis: {
+                            type: 'category',
+                            labels: {
+                                rotation: 0
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '灾难事件数量'
+                            }
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        tooltip: {
+                            pointFormat: '灾难事件: <b>{point.y:.0f}</b>'
+                        },
+                        series: [{
+                            name: '灾难事件数量',
+                            data: [
+                                {% for cd in category_data %}
+                        ['{{ cd.category }}', {{ cd.num }} ],
+                        {% endfor %}
+                                ],
+                    dataLabels: {
+                        enabled: true,
+                            rotation: -90,
+                                color: '#FFFFFF',
+                                    align: 'right',
+                                        format: '{point.y:.0f}',
+                                            y: 10
+                    }
+                            }]
+                        });
+                </script>
+                </br>
+                <div id="container" style="min-width:600px;height:600px"></div>
+                <script>
+                    Highcharts.chart('container', {
+                        credits: {
+                            enabled: false
+                        },
+                        chart: {
+                            plotBackgroundColor: null,
+                            plotBorderWidth: null,
+                            plotShadow: false,
+                            type: 'pie'
+                        },
+                        title: {
+                            text: '{{ province }}灾难事件饼图'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                                    style: {
+                                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                    }
+                                }
+                            }
+                        },
+                        series: [{
+                            name: '占比',
+                            colorByPoint: true,
+                            data: [
+                                {% for cd in category_data %}
+                            { name: '{{ cd.category }}', y: {{ cd.num }} / {{ num }} * 100,},
+                        {% endfor %}
+                            ]
+                        }]
+                    });
+                </script>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+            </form>
+            {% elif interface == 'province' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">地区统计图</legend>
+            </fieldset>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="全部类型" title="全部类型" checked="">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="province_display"
+                            value="True">筛选</button>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+                <div id="container" style="min-width:600px;height:600px"></div>
+                <script src="/static/Highcharts-9.1.0/code/highcharts.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/modules/exporting.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/highcharts-zh_CN.js"></script>
+                <script>
+                    Highcharts.chart('container', {
+                        credits: {
+                            enabled: false
+                        },
+                        chart: {
+                            plotBackgroundColor: null,
+                            plotBorderWidth: null,
+                            plotShadow: false,
+                            type: 'pie'
+                        },
+                        title: {
+                            text: '{{ category }}事件饼图'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                                    style: {
+                                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                    }
+                                }
+                            }
+                        },
+                        series: [{
+                            name: '占比',
+                            colorByPoint: true,
+                            data: [
+                                {% for pd in province_data %}
+                            { name: '{{ pd.province }}', y: {{ pd.num }} / {{ num }} * 100,},
+                        {% endfor %}
+                            ]
+                        }]
+                    });
+                </script>
+                </br>
+                <div id="container1" style="min-width:500px;height:{{ len }}px"></div>
+                <script scr="/static/Highcharts-9.1.0/code/modules/oldie.js"></script>
+                <script>
+                    var chart = Highcharts.chart('container1', {
+                        credits: {
+                            enabled: false
+                        },
+                        chart: {
+                            type: 'bar'
+                        },
+                        title: {
+                            text: '全国各地不同类型灾难数量条形图'
+                        },
+                        subtitle: {
+                            text: '数据来源: NCUT灾难事件数据库'
+                        },
+                        xAxis: {
+                            categories: [
+                                {% for cd in china_data %}
+                                '{{ cd.province }}',
+                                {% endfor %}
+                            ],
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '灾难事件数量',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            valueSuffix: ''
+                        },
+                        plotOptions: {
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    allowOverlap: false
+                                }
+                            }
+                        },
+                        legend: {
+                            layout: 'vertical',
+                            align: 'right',
+                            verticalAlign: 'top',
+                            x: -40,
+                            y: 100,
+                            floating: true,
+                            borderWidth: 1,
+                            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+                            shadow: true
+                        },
+                        series: [{
+                            name: '地震',
+                            data: [
+                                {% for cd in china_data %}
+                                {{ cd.dz }},
+                                {% endfor %}
+                            ]
+                        }, {
+                            name: '水灾',
+                            data: [
+                                {% for cd in china_data %}
+                                {{ cd.hl }},
+                                {% endfor %}
+                            ]
+                        }, {
+                            name: '火灾',
+                            data: [
+                                {% for cd in china_data %}
+                                {{ cd.hz }},
+                                {% endfor %}
+                            ]
+                        }, {
+                            name: '矿难',
+                            data: [
+                                {% for cd in china_data %}
+                                {{ cd.mk }},
+                                {% endfor %}
+                            ]
+                        }, {
+                            name: '爆炸',
+                            data: [
+                                {% for cd in china_data %}
+                                {{ cd.bz }},
+                                {% endfor %}
+                            ]
+                        }, {
+                            name: '空难',
+                            data: [
+                                {% for cd in china_data %}
+                                {{ cd.kn }},
+                                {% endfor %}
+                            ]
+                        }]
+                    });
+                </script>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="display_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+            </form>
+            {% endif %}
+            {% elif func == 'data_mining' %}
+            {% if interface == 'main' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">数据挖掘</legend>
+            </fieldset>
+            <script type="text/javascript">
+                form.render();
+            </script>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block" align="center">
+                        <input type="radio" name="mining_category" value="关键词" title="关键词" checked="">
+                        <input type="radio" name="mining_category" value="主题摘要" title="主题摘要">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="mine"
+                            value="True">挖掘</button>
+                    </div>
+                </div>
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        点击按钮进行数据挖掘！
+                    </blockquote>
+                </div>
+            </form>
+            {% elif interface == 'key' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">关键词挖掘</legend>
+            </fieldset>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="全部类型" title="全部类型" checked="">
+                        <input type="radio" name="category" value="地震" title="地震">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="key_mining"
+                            value="True">筛选</button>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="mine_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+                <div id="container" style="min-width:600px;height:600px"></div>
+                <script src="/static/Highcharts-9.1.0/code/highcharts.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/modules/exporting.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/modules/wordcloud.js"></script>
+                <script src="/static/Highcharts-9.1.0/code/modules/oldie.js"></script>
+                <script>
+                    var text = '{{ text }}';
+                    var data = text.split(/[,\. ]+/g)
+                    .reduce(function (arr, word) {
+                        var obj = arr.find(function (obj) {
+                            return obj.name === word;
+                        });
+                        if (obj) {
+                            obj.weight += 1;
+                        } else {
+                            obj = {
+                                name: word,
+                                weight: 1
+                            };
+                            arr.push(obj);
+                        }
+                        return arr;
+                    }, []);
+                    Highcharts.chart('container', {
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            type: 'wordcloud',
+                            data: data
+                        }],
+                        title: {
+                            text: '{{ category }}事件关键词云图'
+                        }
+                    });
+                </script>
+            </form>
+            {% elif interface == 'abs' %}
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend align="center">主题摘要挖掘</legend>
+            </fieldset>
+            <form class="layui-form" action="/disaster/" lay-filter="example" method="GET">
+                <div class="layui-form-item" align="center">
+                    <div class="layui-input-block">
+                        <input type="radio" name="category" value="地震" title="地震" checked="">
+                        <input type="radio" name="category" value="水灾" title="水灾">
+                        <input type="radio" name="category" value="火灾" title="火灾">
+                        <input type="radio" name="category" value="矿难" title="矿难">
+                        <input type="radio" name="category" value="爆炸" title="爆炸">
+                        <input type="radio" name="category" value="空难" title="空难">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-btn-container" align="center">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="abs_mining"
+                            value="True">挖掘</button>
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1" name="mine_back"
+                            value="True">返回</button>
+                    </div>
+                </div>
+                {% if num > 0 %}
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <colgroup>
+                            <col>
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th style="text-align: center">{{ category }}事件主题与摘要</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for abs in abstract %}
+                            <tr>
+                                <td>{{ abs }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% elif num == 0 %}
+                <div align="center">
+                    <blockquote class=" layui-elem-quote" style="width:1000px">
+                        没有数据，请导入更多数据后再试！
+                    </blockquote>
+                </div>
+                {% endif %}
+            </form>
+            {% endif %}
+            {% endif %}
+            </br>
+            </br>
+            </br>
+            </br>
+            </br>
+        </div>
+        <div class="layui-footer" align="center">
+            软件课程设计—北方工业大学信息学院计XX-X班XXX于2021年7月制作
+        </div>
+    </div>
+    <script>
+        layui.use(['form', 'element', 'layer', 'util', 'laydate'], function () {
+            var element = layui.element
+                , layer = layui.layer
+                , util = layui.util
+                , $ = layui.$
+                , laydate = layui.laydate
+                , form = layui.form;
+            laydate.render({
+                elem: '#date'
+            });
+            util.event('lay-header-event', {
+                menuLeft: function (othis) {
+                    layer.msg('展开左侧菜单的操作', { icon: 0 });
+                }
+            });
+            form.on('switch(switchTest)', function (data) {
+                layer.msg((this.checked ? '已开启过滤' : '已关闭过滤'), {
+                    offset: '6px'
+                });
+                layer.tips('温馨提示：开启过滤查询更加精确', data.othis)
+            });
+            form.on('switch(switch)', function (data) {
+                layer.msg((this.checked ? '已开启过滤' : '已关闭过滤'), {
+                    offset: '6px'
+                });
+            });
+            {% if interface == 'time' or interface == 'province' or is_search == 'True' or is_enter == 'True' or interface == 'abs' %}
+            util.fixbar({
+                bar1: false
+                ,bar2: false
+                ,css: {right: 50, bottom: 100}
+                ,bgcolor: '#393D49'
+                ,click: function(type){
+                    if(type === 'bar1'){
+                        layer.msg('icon 是可以随便换的')
+                    } else if(type === 'bar2') {
+                        layer.msg('两个 bar 都可以设定是否开启')
+                    }
+                }
+            });
+            {% endif %}
+        });
+        layui.use('form', function () {
+            const form = layui.form;
+            form.render();
+        });
+        var province = ["北京市", "天津市", "河北省", "山西省", "内蒙古自治区", "辽宁省", "吉林省", "黑龙江省", "上海市", "江苏省", "浙江省", "安徽省", "福建省", "江西省", "山东省", "河南省", "湖北省", "湖南省", "广东省", "广西壮族自治区", "海南省", "重庆市", "四川省", "贵州省", "云南省", "西藏自治区", "陕西省", "甘肃省", "青海省", "宁夏回族自治区", "新疆维吾尔自治区", "香港特别行政区", "澳门特别行政区", "台湾省"];
+        var beijing = ["东城区", "西城区", "朝阳区", "丰台区", "石景山区", "海淀区", "门头沟区", "房山区", "通州区", "顺义区", "昌平区", "大兴区", "怀柔区", "平谷区", "密云区", "延庆区"];
+        var shanghai = ["黄浦区", "徐汇区", "长宁区", "静安区", "普陀区", "虹口区", "杨浦区", "闵行区", "宝山区", "嘉定区", "浦东新区", "金山区", "松江区", "青浦区", "奉贤区", "崇明区"];
+        var tianjing = ["和平区", "河东区", "河西区", "南开区", "河北区", "红桥区", "东丽区", "西青区", "津南区", "北辰区", "武清区", "宝坻区", "滨海新区", "宁河区", "静海区", "蓟州区"];
+        var chongqing = ["万州区", "涪陵区", "渝中区", "大渡口区", "江北区", "沙坪坝区", "九龙坡区", "南岸区", "北碚区", "綦江区", "大足区", "渝北区", "巴南区", "黔江区", "长寿区", "江津区", "合川区", "永川区", "南川区", "璧山区", "铜梁区", "潼南区", "荣昌区", "开州区", "梁平区", "武隆区", "城口县", "丰都县", "垫江县", "忠县", "云阳县", "奉节县", "巫山县", "巫溪县", "石柱土家族自治县", "秀山土家族苗族自治县", "酉阳土家族苗族自治县", "彭水苗族土家族自治县"];
+        var jiangsu = ["南京市", "无锡市", "徐州市", "常州市", "苏州市", "南通市", "连云港市", "淮安市", "盐城市", "扬州市", "镇江市", "泰州市", "宿迁市"];
+        var zhejiang = ["杭州市", "宁波市", "温州市", "嘉兴市", "湖州市", "绍兴市", "金华市", "衢州市", "舟山市", "台州市", "丽水市"];
+        var guangdong = ["广州市", "深圳市", "韶关市", "珠海市", "汕头市", "佛山市", "江门市", "湛江市", "茂名市", "肇庆市", "惠州市", "梅州市", "汕尾市", "河源市", "阳江市", "清远市", "东莞市", "中山市", "潮州市", "揭阳市", "云浮市"];
+        var fujiang = ["厦门市", "福州市", "莆田市", "三明市", "泉州市", "漳州市", "南平市", "龙岩市", "宁德市"];
+        var hunan = ["长沙市", "株洲市", "湘潭市", "衡阳市", "邵阳市", "岳阳市", "常德市", "张家界市", "益阳市", "郴州市", "永州市", "怀化市", "娄底市", "湘西土家族苗族自治州"];
+        var hubei = ["武汉市", "黄石市", "十堰市", "宜昌市", "襄阳市", "鄂州市", "荆门市", "孝感市", "荆州市", "黄冈市", "咸宁市", "随州市", "恩施土家族苗族自治州", "仙桃市", "潜江市", "天门市", "神农架林区"];
+        var liaoning = ["沈阳市", "大连市", "鞍山市", "抚顺市", "本溪市", "丹东市", "锦州市", "营口市", "阜新市", "辽阳市", "盘锦市", "铁岭市", "朝阳市", "葫芦岛市"];
+        var jilin = ["长春市", "吉林市", "四平市", "辽源市", "通化市", "白山市", "松原市", "白城市", "延边朝鲜族自治州"];
+        var heilongjiang = ["哈尔滨市", "齐齐哈尔市", "鸡西市", "鹤岗市", "双鸭山市", "大庆市", "伊春市", "佳木斯市", "七台河市", "牡丹江市", "黑河市", "绥化市", "大兴安岭地区"];
+        var hebei = ["石家庄市", "唐山市", "秦皇岛市", "邯郸市", "邢台市", "保定市", "张家口市", "承德市", "沧州市", "廊坊市", "衡水市", "雄安新区", "华北油田地区", "辛集市", "定州市"];
+        var henan = ["郑州市", "开封市", "洛阳市", "平顶山市", "安阳市", "鹤壁市", "新乡市", "焦作市", "濮阳市", "许昌市", "漯河市", "三门峡市", "南阳市", "商丘市", "信阳市", "周口市", "驻马店市", "济源市"];
+        var shandong = ["济南市", "青岛市", "淄博市", "枣庄市", "东营市", "烟台市", "潍坊市", "济宁市", "泰安市", "威海市", "日照市", "临沂市", "德州市", "聊城市", "滨州市", "菏泽市"];
+        var shangxi = ["西安市", "铜川市", "宝鸡市", "咸阳市", "渭南市", "延安市", "汉中市", "榆林市", "安康市", "商洛市"];
+        var gansu = ["兰州市", "嘉峪关市", "金昌市", "白银市", "天水市", "武威市", "张掖市", "平凉市", "酒泉市", "庆阳市", "定西市", "陇南市", "临夏回族自治州", "甘南藏族自治州"];
+        var qinghai = ["西宁市", "海东市", "海北藏族自治州", "黄南藏族自治州", "海南藏族自治州", "果洛藏族自治州", "玉树藏族自治州", "海西蒙古族藏族自治州"];
+        var xinjiang = ["乌鲁木齐市", "克拉玛依市", "吐鲁番市", "哈密市", "昌吉回族自治州", "博尔塔拉蒙古自治州", "巴音郭楞蒙古自治州", "克孜勒苏柯尔克孜自治州", "伊犁哈萨克自治州", "阿克苏地区", "喀什地区", "和田地区", "塔城地区", "阿勒泰地区", "石河子市", "阿拉尔市", "图木舒克市", "五家渠市", "北屯市", "铁门关市", "双河市", "可克达拉市", "昆玉市", "胡杨河市", "新星市"];
+        var shanxi = ["太原市", "大同市", "阳泉市", "长治市", "晋城市", "朔州市", "晋中市", "运城市", "忻州市", "临汾市", "吕梁市"];
+        var sichuan = ["成都市", "自贡市", "攀枝花市", "泸州市", "德阳市", "绵阳市", "广元市", "遂宁市", "内江市", "乐山市", "南充市", "眉山市", "宜宾市", "广安市", "达州市", "雅安市", "巴中市", "资阳市", "阿坝藏族羌族自治州", "甘孜藏族自治州", "凉山彝族自治州"];
+        var guizhou = ["贵阳市", "六盘水市", "遵义市", "安顺市", "毕节市", "铜仁市", "黔西南布依族苗族自治州", "黔东南苗族侗族自治州", "黔南布依族苗族自治州"];
+        var anhui = ["合肥市", "芜湖市", "蚌埠市", "淮南市", "马鞍山市", "淮北市", "铜陵市", "安庆市", "黄山市", "滁州市", "阜阳市", "宿州市", "六安市", "亳州市", "巢湖市", "池州市", "宣城市"];
+        var jiangxi = ["南昌市", "景德镇市", "萍乡市", "九江市", "新余市", "鹰潭市", "赣州市", "吉安市", "宜春市", "抚州市", "上饶市"];
+        var yunnan = ["昆明市", "曲靖市", "玉溪市", "保山市", "昭通市", "丽江市", "普洱市", "临沧市", "楚雄彝族自治州", "红河哈尼族彝族自治州", "文山壮族苗族自治州", "西双版纳傣族自治州", "大理白族自治州", "德宏傣族景颇族自治州", "怒江傈僳族自治州", "迪庆藏族自治州"];
+        var neimenggu = ["呼和浩特市", "包头市", "乌海市", "赤峰市", "通辽市", "鄂尔多斯市", "呼伦贝尔市", "巴彦淖尔市", "乌兰察布市", "兴安盟", "锡林郭勒盟", "阿拉善盟"];
+        var guangxi = ["南宁市", "柳州市", "桂林市", "梧州市", "北海市", "防城港市", "钦州市", "贵港市", "玉林市", "百色市", "贺州市", "河池市", "来宾市", "崇左市"];
+        var xizang = ["拉萨市", "日喀则市", "昌都市", "林芝市", "山南市", "那曲市", "阿里地区"];
+        var ningxia = ["银川市", "石嘴山市", "吴忠市", "固原市", "中卫市"];
+        var hainan = ["海口市", "三亚市", "三沙市", "儋州市", "五指山市", "琼海市", "文昌市", "万宁市", "东方市", "定安县", "屯昌县", "澄迈县", "临高县", "白沙黎族自治县", "昌江黎族自治县", "乐东黎族自治县", "陵水黎族自治县", "保亭黎族苗族自治县", "琼中黎族苗族自治县"];
+        var xianggang = ["中西区", "东区", "南区", "湾仔区", "九龙城区", "深水埗区", "油尖旺区", "黄大仙区", "观塘区", "北区", "西贡区", "沙田区", "大埔区", "离岛区", "葵青区", "荃湾区", "屯门区", "元朗区", "港岸区", "河套区"];
+        var taiwan = ["台北市", "新北市", "桃园市", "台中市", "台南市", "高雄市", "基隆市", "新竹市", "嘉义市", "新竹县", "宜兰县", "苗栗县", "彰化县", "云林县", "南投县", "嘉义县", "屏东县", "台东县", "花莲县", "澎湖县"];
+        var aomeng = ["花地玛堂区", "圣安多尼堂区", "大堂区", "望德堂区", "风顺堂区", "嘉模堂区", "圣方济各堂区", "路氹城"];
+        $(function () {
+            layui.use('form', function () {
+                form = layui.form;
+                setProvince();
+                form.on('select(province)', function (data) {
+                    setPrefecture(data.value);
+                });
+            });
+        });
+        function setProvince() {
+            var $sel = $("#selProvince");
+            for (var i = 0, len = province.length; i < len; i++) {
+                var option = $("<option value='" + province[i] + "'>" + province[i] + "</option>");
+                $sel.append(option);
+            }
+            form.render('select');
+            setPrefecture($($sel.get(0)).val());
+        }
+        function setPrefecture(province) {
+            var $prefecture = $("#selPrefecture");
+            var proPrefecture, option;
+            switch (province) {
+                case "北京市":
+                    proPrefecture = beijing;
+                    break;
+                case "上海市":
+                    proPrefecture = shanghai;
+                    break;
+                case "天津市":
+                    proPrefecture = tianjing;
+                    break;
+                case "重庆市":
+                    proPrefecture = chongqing;
+                    break;
+                case "浙江省":
+                    proPrefecture = zhejiang;
+                    break;
+                case "江苏省":
+                    proPrefecture = jiangsu;
+                    break;
+                case "广东省":
+                    proPrefecture = guangdong;
+                    break;
+                case "福建省":
+                    proPrefecture = fujiang;
+                    break;
+                case "湖南省":
+                    proPrefecture = hunan;
+                    break;
+                case "湖北省":
+                    proPrefecture = hubei;
+                    break;
+                case "辽宁省":
+                    proPrefecture = liaoning;
+                    break;
+                case "吉林省":
+                    proPrefecture = jilin;
+                    break;
+                case "黑龙江省":
+                    proPrefecture = heilongjiang;
+                    break;
+                case "河北省":
+                    proPrefecture = hebei;
+                    break;
+                case "河南省":
+                    proPrefecture = henan;
+                    break;
+                case "山东省":
+                    proPrefecture = shandong;
+                    break;
+                case "陕西省":
+                    proPrefecture = shangxi;
+                    break;
+                case "甘肃省":
+                    proPrefecture = gansu;
+                    break;
+                case "新疆维吾尔自治区":
+                    proPrefecture = xinjiang;
+                    break;
+                case "青海省":
+                    proPrefecture = qinghai;
+                    break;
+                case "山西省":
+                    proPrefecture = shanxi;
+                    break;
+                case "四川省":
+                    proPrefecture = sichuan;
+                    break;
+                case "贵州省":
+                    proPrefecture = guizhou;
+                    break;
+                case "安徽省":
+                    proPrefecture = anhui;
+                    break;
+                case "江西省":
+                    proPrefecture = jiangxi;
+                    break;
+                case "云南省":
+                    proPrefecture = yunnan;
+                    break;
+                case "内蒙古自治区":
+                    proPrefecture = neimenggu;
+                    break;
+                case "西藏自治区":
+                    proPrefecture = xizang;
+                    break;
+                case "广西壮族自治区":
+                    proPrefecture = guangxi;
+                    break;
+                case "宁夏回族自治区":
+                    proPrefecture = ningxia;
+                    break;
+                case "海南省":
+                    proPrefecture = hainan;
+                    break;
+                case "香港特别行政区":
+                    proPrefecture = xianggang;
+                    break;
+                case "澳门特别行政区":
+                    proPrefecture = aomeng;
+                    break;
+                case "台湾省":
+                    proPrefecture = taiwan;
+                    break;
+            }
+            $prefecture.empty();
+            for (var i = 0, len = proPrefecture.length; i < len; i++) {
+                option = $("<option value='" + proPrefecture[i] + "'>" + proPrefecture[i] + "</option>");
+                $prefecture.append(option);
+            }
+            form.render('select');
+        }
+    </script>
+</body>
